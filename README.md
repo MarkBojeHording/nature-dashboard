@@ -1,73 +1,57 @@
-# Welcome to your Lovable project
+# Nature Dashboard Chrome Extension
 
-## Project info
+A beautiful and functional Chrome extension that serves as your personal nature-inspired dashboard. This extension provides a clean, minimalist interface to help you stay organized and connected with nature.
 
-**URL**: https://lovable.dev/projects/34d753dd-5e09-4933-92a4-3b8fe60e056a
+## Features
 
-## How can I edit this code?
+- Clean, nature-inspired design
+- Customizable dashboard interface
+- Local storage for personal preferences
+- Responsive popup interface
+- Beautiful icon set with nature theme
 
-There are several ways of editing your application.
+## Installation
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/34d753dd-5e09-4933-92a4-3b8fe60e056a) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+1. Clone this repository:
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+git clone https://github.com/MarkBojeHording/nature-dashboard.git
+cd nature-dashboard
 ```
 
-**Edit a file directly in GitHub**
+2. Load the extension in Chrome:
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode" in the top right
+   - Click "Load unpacked"
+   - Select the `nature-dashboard` directory
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Development
 
-**Use GitHub Codespaces**
+The extension is built using:
+- HTML5
+- CSS3
+- JavaScript
+- Chrome Extension Manifest V3
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Project Structure
+```
+nature-dashboard/
+├── manifest.json    # Extension configuration
+├── index.html      # Main dashboard interface
+├── icons/          # Extension icons
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
+└── README.md       # This file
+```
 
-## What technologies are used for this project?
+## Contributing
 
-This project is built with:
+Feel free to submit issues and enhancement requests!
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## License
 
-## How can I deploy this project?
+This project is open source and available under the MIT License.
 
-Simply open [Lovable](https://lovable.dev/projects/34d753dd-5e09-4933-92a4-3b8fe60e056a) and click on Share -> Publish.
+## Author
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Mark Boje Hording
