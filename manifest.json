@@ -13,5 +13,8 @@
   },
   "permissions": [
     "storage"
+  ],
+  "host_permissions": [
+    "https://www.yourdashboardurl.com/*"
   ]
 }
