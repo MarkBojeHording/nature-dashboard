@@ -14,10 +14,11 @@
   "permissions": [
     "storage"
   ],
-  "host_permissions": [
-    "https://www.yourdashboardurl.com/*"
-  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  },
+  "web_accessible_resources": [{
+    "resources": ["assets/*"],
+    "matches": ["<all_urls>"]
+  }]
 }
