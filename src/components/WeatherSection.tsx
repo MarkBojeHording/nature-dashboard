@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Cloud, Sun, CloudRain, Wind, Droplets, Eye } from 'lucide-react';
 import { getWeatherByCoords, WeatherData as WeatherDataType } from '@/services/weatherService';
-import { getPollutionByCoords, getAQIDescription, PollutionData } from '@/services/pollutionService';
 
 interface WeatherData {
   temperature: number;
@@ -10,11 +9,17 @@ interface WeatherData {
   humidity: number;
   windSpeed: number;
   visibility: number;
-  pollution: {
-    aqi: number;
-    level: string;
-  };
   city: string;
+  air_quality: {
+    co: number;
+    no2: number;
+    o3: number;
+    so2: number;
+    pm2_5: number;
+    pm10: number;
+    'us-epa-index': number;
+    'gb-defra-index': number;
+  };
 }
 
 const WeatherSection = () => {
@@ -24,11 +29,17 @@ const WeatherSection = () => {
     humidity: 0,
     windSpeed: 0,
     visibility: 0,
-    pollution: {
-      aqi: 0,
-      level: 'Loading...'
+    city: 'Loading...',
+    air_quality: {
+      co: 0,
+      no2: 0,
+      o3: 0,
+      so2: 0,
+      pm2_5: 0,
+      pm10: 0,
+      'us-epa-index': 0,
+      'gb-defra-index': 0,
     },
-    city: 'Loading...'
   });
 
   const [loading, setLoading] = useState(true);
@@ -38,23 +49,30 @@ const WeatherSection = () => {
     try {
       setLoading(true);
       setError(null);
+      const weatherData = await getWeatherByCoords(lat, lon);
+      console.log('Weather API response:', weatherData);
 
-      const [weatherData, pollutionData] = await Promise.all([
-        getWeatherByCoords(lat, lon),
-        getPollutionByCoords(lat, lon)
-      ]);
+      // Defensive check
+      if (
+        !weatherData ||
+        !weatherData.main ||
+        !weatherData.weather ||
+        !weatherData.wind ||
+        !weatherData.air_quality
+      ) {
+        setError('Weather data is unavailable or incomplete.');
+        setLoading(false);
+        return;
+      }
 
       setWeather({
         temperature: weatherData.main.temp,
         condition: weatherData.weather[0].main,
         humidity: weatherData.main.humidity,
         windSpeed: weatherData.wind.speed,
-        visibility: weatherData.visibility / 1000, // Convert to km
-        pollution: {
-          aqi: pollutionData.list[0].main.aqi,
-          level: getAQIDescription(pollutionData.list[0].main.aqi)
-        },
-        city: weatherData.name
+        visibility: weatherData.visibility,
+        city: weatherData.name,
+        air_quality: weatherData.air_quality,
       });
     } catch (err) {
       setError('Failed to fetch weather data');
@@ -65,7 +83,6 @@ const WeatherSection = () => {
   };
 
   useEffect(() => {
-    // Get user's location and fetch weather data
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -81,8 +98,6 @@ const WeatherSection = () => {
       setError('Geolocation is not supported by your browser');
       setLoading(false);
     }
-
-    // Refresh data every 30 minutes
     const interval = setInterval(() => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -93,7 +108,6 @@ const WeatherSection = () => {
         );
       }
     }, 30 * 60 * 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -109,20 +123,22 @@ const WeatherSection = () => {
     }
   };
 
-  const getPollutionColor = (level: string) => {
-    switch (level) {
-      case 'Good':
-        return 'text-green-400';
-      case 'Fair':
-        return 'text-green-300';
-      case 'Moderate':
-        return 'text-yellow-400';
-      case 'Poor':
-        return 'text-orange-400';
-      case 'Very Poor':
-        return 'text-red-400';
+  const getAQILevel = (epaIndex: number) => {
+    switch (epaIndex) {
+      case 1:
+        return { label: 'Good', color: 'text-green-400' };
+      case 2:
+        return { label: 'Moderate', color: 'text-yellow-400' };
+      case 3:
+        return { label: 'Unhealthy for Sensitive', color: 'text-orange-400' };
+      case 4:
+        return { label: 'Unhealthy', color: 'text-red-400' };
+      case 5:
+        return { label: 'Very Unhealthy', color: 'text-purple-400' };
+      case 6:
+        return { label: 'Hazardous', color: 'text-pink-600' };
       default:
-        return 'text-gray-400';
+        return { label: 'Unknown', color: 'text-gray-400' };
     }
   };
 
@@ -149,6 +165,9 @@ const WeatherSection = () => {
     );
   }
 
+  const aqi = weather.air_quality['us-epa-index'];
+  const aqiLevel = getAQILevel(aqi);
+
   return (
     <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
       <CardHeader>
@@ -163,33 +182,33 @@ const WeatherSection = () => {
           <div className="text-lg text-gray-200">{weather.condition}</div>
           <div className="text-sm text-gray-300">{weather.city}</div>
         </div>
-
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center space-x-2">
             <Droplets className="h-4 w-4 text-blue-400" />
             <span className="text-sm">Humidity: {Math.round(weather.humidity)}%</span>
           </div>
-
           <div className="flex items-center space-x-2">
             <Wind className="h-4 w-4 text-gray-300" />
-            <span className="text-sm">Wind: {Math.round(weather.windSpeed)} m/s</span>
+            <span className="text-sm">Wind: {Math.round(weather.windSpeed)} km/h</span>
           </div>
-
           <div className="flex items-center space-x-2">
             <Eye className="h-4 w-4 text-gray-300" />
             <span className="text-sm">Visibility: {weather.visibility} km</span>
           </div>
-
           <div className="flex items-center space-x-2">
-            <div className={`h-3 w-3 rounded-full ${getPollutionColor(weather.pollution.level).replace('text-', 'bg-')}`} />
-            <span className="text-sm">AQI: {weather.pollution.aqi}</span>
+            <div className={`h-3 w-3 rounded-full ${aqiLevel.color.replace('text-', 'bg-')}`} />
+            <span className="text-sm">AQI: {aqi} ({aqiLevel.label})</span>
           </div>
         </div>
-
         <div className="mt-4 p-3 bg-black/20 rounded-lg">
-          <div className="text-sm font-medium">Air Quality</div>
-          <div className={`text-lg font-bold ${getPollutionColor(weather.pollution.level)}`}>
-            {weather.pollution.level}
+          <div className="text-sm font-medium">Air Quality Details</div>
+          <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+            <div>PM2.5: <span className="font-bold">{weather.air_quality.pm2_5.toFixed(1)}</span></div>
+            <div>PM10: <span className="font-bold">{weather.air_quality.pm10.toFixed(1)}</span></div>
+            <div>CO: <span className="font-bold">{weather.air_quality.co.toFixed(1)}</span></div>
+            <div>NO₂: <span className="font-bold">{weather.air_quality.no2.toFixed(1)}</span></div>
+            <div>O₃: <span className="font-bold">{weather.air_quality.o3.toFixed(1)}</span></div>
+            <div>SO₂: <span className="font-bold">{weather.air_quality.so2.toFixed(1)}</span></div>
           </div>
         </div>
       </CardContent>

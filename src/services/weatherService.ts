@@ -1,11 +1,6 @@
 import axios from 'axios';
 
-const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY || process.env.VITE_WEATHER_API_KEY;
-const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
-
-if (!WEATHER_API_KEY) {
-  console.error('Weather API key is not defined. Please check your environment variables.');
-}
+const WEATHER_BASE_URL = '/.netlify/functions/weather-proxy';
 
 export interface WeatherData {
   main: {
@@ -25,15 +20,23 @@ export interface WeatherData {
   };
   visibility: number;
   name: string;
+  air_quality: {
+    co: number;
+    no2: number;
+    o3: number;
+    so2: number;
+    pm2_5: number;
+    pm10: number;
+    'us-epa-index': number;
+    'gb-defra-index': number;
+  };
 }
 
 export const getWeatherByCity = async (city: string): Promise<WeatherData> => {
   try {
-    const response = await axios.get(`${WEATHER_BASE_URL}/weather`, {
+    const response = await axios.get(WEATHER_BASE_URL, {
       params: {
         q: city,
-        appid: WEATHER_API_KEY,
-        units: 'metric',
       },
     });
     return response.data;
@@ -45,12 +48,10 @@ export const getWeatherByCity = async (city: string): Promise<WeatherData> => {
 
 export const getWeatherByCoords = async (lat: number, lon: number): Promise<WeatherData> => {
   try {
-    const response = await axios.get(`${WEATHER_BASE_URL}/weather`, {
+    const response = await axios.get(WEATHER_BASE_URL, {
       params: {
         lat,
         lon,
-        appid: WEATHER_API_KEY,
-        units: 'metric',
       },
     });
     return response.data;
